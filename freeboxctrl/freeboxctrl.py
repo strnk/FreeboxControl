@@ -88,24 +88,29 @@ class FreeboxCtrl:
         body = {'default_filter_mode': default_filter_mode}
         data = self.__authenticated_request('/api/v3/parental/config/', body, "PUT")
     
-    def parental_filters(self):
+    def parental_filter_rules(self):
         data = self.__authenticated_request('/api/v3/parental/filter/')
         if data["success"] and "result" not in data:
             return []
         else:
             return data['result']
     
-    def parental_filter_get(self, id):
-        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id))
-        return data['result']
-        
-    def parental_filter_delete(self, id):
-        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id), None, "DELETE")
-        return data["success"]
-    
-    def parental_filter_add(self, macs):
+    def parental_filter_add_rule(self, macs):
         body = {'macs': macs}
         data = self.__authenticated_request('/api/v3/parental/filter/', body)
+    
+    def parental_filter_get_rule(self, id):
+        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id))
+        return data['result']
+    
+    def parental_filter_update_rule(self, id, forced_mode, forced):
+        body = { "forced_mode": forced_mode, "forced": forced }
+        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id), body, "PUT")
+        return data['result']
+        
+    def parental_filter_delete_rule(self, id):
+        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id), None, "DELETE")
+        return data["success"]
 
     def __start_session(self):
         self.__sessionToken = ''

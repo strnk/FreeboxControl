@@ -7,12 +7,18 @@ class NetworkError(Exception):
 
 
 class FreeboxError(Exception):
-    def __init__(self, value):
+    _data = None
+    
+    def __init__(self, value, data):
         self.value = value
+        self._data = data
         print self.value
 
     def __str__(self):
         return repr(self.value)
+    
+    def data(self):
+        return self._data
 
 
 class AppTokenError(Exception):

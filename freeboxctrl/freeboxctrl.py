@@ -23,7 +23,7 @@ class FreeboxCtrl:
                            'app_version': app_version, 'device_name': device_name})
         data = self.__json_request('/api/v3/login/authorize/', body)
         if not data['success']:
-            raise FreeboxError(data['error_code'] + ': ' + (data['msg']))
+            raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         status = 'pending'
         while status == 'pending':
             status = self.__get_app_token_status(data['result']['track_id'])
@@ -111,19 +111,19 @@ class FreeboxCtrl:
         if not data['success']:
             if data['error_code'] == 'invalid_token':
                 raise AppTokenError(AppTokenError.appTokenUnknown)
-            raise FreeboxError(data['error_code'] + ': ' + (data['msg']))
+            raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         self.__sessionToken = data['result']['session_token']
 
     def __get_challenge(self):
         data = self.__json_request('/api/v3/login/')
         if not data['success']:
-            raise FreeboxError(data['error_code'] + ': ' + (data['msg']))
+            raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         return data['result']['challenge']
 
     def __get_app_token_status(self, track_id):
         data = self.__json_request('/api/v3/login/authorize/' + str(track_id))
         if not data['success']:
-            raise FreeboxError(data['error_code'] + ': ' + (data['msg']))
+            raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         return data['result']['status']
 
     def __authenticated_request(self, url, body = None, type = None):
@@ -134,7 +134,7 @@ class FreeboxCtrl:
             self.__start_session()
             data = self.__json_request(url)
         if not data['success']:
-            raise FreeboxError(data['error_code'] + ': ' + (data['msg']))
+            raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         return data
     
     def __json_request(self, url, body = None, type = None):

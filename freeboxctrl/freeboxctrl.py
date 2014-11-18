@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import httplib
 import json
 import hmac

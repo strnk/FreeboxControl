@@ -80,7 +80,7 @@ class FreeboxCtrl:
         data = self.__authenticated_request('/api/v3/lan/browser/' + interface + '/')
         return data['result']
     
-    def parental_filter_config(self):
+    def parental_filter_get_config(self):
         data = self.__authenticated_request('/api/v3/parental/config/')
         return data['result']
     

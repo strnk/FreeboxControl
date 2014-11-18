@@ -102,6 +102,10 @@ class FreeboxCtrl:
     def parental_filter_delete(self, id):
         data = self.__authenticated_request('/api/v3/parental/filter/' + str(id), None, "DELETE")
         return data["success"]
+    
+    def parental_filter_add(self, macs):
+        body = {'macs': macs}
+        data = self.__authenticated_request('/api/v3/parental/filter/', body)
 
     def __start_session(self):
         self.__sessionToken = ''

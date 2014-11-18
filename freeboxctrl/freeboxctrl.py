@@ -19,8 +19,8 @@ class FreeboxCtrl:
         self.__connection = httplib.HTTPConnection(target)
 
     def register(self, app_name, device_name='FreeboxCtrl', app_version='1.0'):
-        body = json.dumps({'app_id': self.__appId, 'app_name': app_name,
-                           'app_version': app_version, 'device_name': device_name})
+        body = {'app_id': self.__appId, 'app_name': app_name,
+                'app_version': app_version, 'device_name': device_name}
         data = self.__json_request('/api/v3/login/authorize/', body)
         if not data['success']:
             raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
@@ -62,8 +62,8 @@ class FreeboxCtrl:
         return data['result']
 
     def play(self, media_type, media):
-        body = json.dumps({'action': 'start', 'media_type': media_type,
-                           'media': media, 'password': ''})
+        body = {'action': 'start', 'media_type': media_type,
+                'media': media, 'password': ''}
         self.__authenticated_request('/api/v3/airmedia/receivers/Freebox%20Player/', body)
         
     def configuration_connection_status(self):
@@ -83,7 +83,7 @@ class FreeboxCtrl:
         return data['result']
     
     def parental_filter_update_config(self, default_filter_mode):
-        body = json.dumps({'default_filter_mode': default_filter_mode})
+        body = {'default_filter_mode': default_filter_mode}
         data = self.__authenticated_request('/api/v3/parental/config/', body, "PUT")
     
     def parental_filters(self):
@@ -106,7 +106,7 @@ class FreeboxCtrl:
         if self.appToken == '':
             raise AppTokenError(AppTokenError.appTokenUnknown)
         password = FreeboxCtrl.__gen_password(self.appToken, self.__get_challenge())
-        body = json.dumps({'app_id': self.__appId, 'password': password})
+        body = {'app_id': self.__appId, 'password': password}
         data = self.__json_request('/api/v3/login/session/', body)
         if not data['success']:
             if data['error_code'] == 'invalid_token':
@@ -137,17 +137,19 @@ class FreeboxCtrl:
             raise FreeboxError(data['error_code'] + ': ' + (data['msg']), data)
         return data
     
-    def __json_request(self, url, body = None, type = None):
+    def __json_request(self, url, body = None, requestType = None):
         headers = {'Content-type': 'application/json',
                    'charset': 'utf-8', 'Accept': 'text/plain',
                    'X-Fbx-App-Auth': self.__sessionToken}
+        if type(body) is dict or type(body) is list:
+            body = json.dumps(body)
+        if requestType is None:
+            if body is None:
+                requestType = 'GET'
+            else:
+                requestType = "POST"
         try:
-            if type is None:
-                if body is None:
-                    type = 'GET'
-                else:
-                    type = "POST"
-            self.__connection.request(type, url, body, headers)
+            self.__connection.request(requestType, url, body, headers)
             response = self.__connection.getresponse()
         except Exception, e:
             self.__connection.close()

@@ -8,6 +8,7 @@ from freeboxexceptions import NetworkError
 from freeboxexceptions import FreeboxError
 from freeboxexceptions import AppTokenError
 import os
+import pprint
 
 
 class FreeboxCtrl:
@@ -81,17 +82,24 @@ class FreeboxCtrl:
         data = self.__authenticated_request('/api/v3/parental/config/')
         return data['result']
     
+    def parental_filter_update_config(self, default_filter_mode):
+        body = json.dumps({'default_filter_mode': default_filter_mode})
+        data = self.__authenticated_request('/api/v3/parental/config/', body, "PUT")
+    
     def parental_filters(self):
         data = self.__authenticated_request('/api/v3/parental/filter/')
-        return data['result']
+        if data["success"] and "result" not in data:
+            return []
+        else:
+            return data['result']
     
     def parental_filter_get(self, id):
         data = self.__authenticated_request('/api/v3/parental/filter/' + str(id))
         return data['result']
         
     def parental_filter_delete(self, id):
-        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id))
-        return data['result']
+        data = self.__authenticated_request('/api/v3/parental/filter/' + str(id), None, "DELETE")
+        return data["success"]
 
     def __start_session(self):
         self.__sessionToken = ''

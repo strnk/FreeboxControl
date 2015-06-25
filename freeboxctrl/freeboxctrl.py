@@ -52,6 +52,10 @@ class FreeboxCtrl:
     def set_token(self, token):
         self.appToken = token
 
+    def api_version(self):
+        data = self.__json_request('/api_version')
+        return data
+
     def is_freebox_player_on(self):
         data = self.__authenticated_request('/api/v3/airmedia/receivers')
         for elt in data['result']:
@@ -68,6 +72,18 @@ class FreeboxCtrl:
                 'media': media, 'password': ''}
         self.__authenticated_request('/api/v3/airmedia/receivers/Freebox%20Player/', body)
         
+    def configuration_system(self):
+        data= self.__authenticated_request('/api/v3/system/')
+        return data['result']
+
+    def configuration_connection_xdsl(self):
+        data = self.__authenticated_request('/api/v3/connection/xdsl/')
+        return data['result']
+
+    def configuration_connection_ftth(self):
+        data = self.__authenticated_request('/api/v3/connection/ftth/')
+        return data['result']
+
     def configuration_connection_status(self):
         data = self.__authenticated_request('/api/v3/connection/')
         return data['result']
@@ -165,7 +181,7 @@ class FreeboxCtrl:
         except Exception, e:
             self.__connection.close()
             raise NetworkError("Freebox server is not reachable: " + e.message)
-        return json.load(response)
+        return json.load(response, object_hook=_decode_dict)
 
     @staticmethod
     def __gen_password(app_token, challenge):
@@ -180,3 +196,30 @@ class FreeboxCtrl:
             raise AppTokenError(AppTokenError.appTokenTimeout)
         elif status == 'denied':
             raise AppTokenError(AppTokenError.appTokenDenied)
+
+
+def _decode_list(data):
+    rv = []
+    for item in data:
+        if isinstance(item, unicode):
+            item = item.encode('utf-8')
+        elif isinstance(item, list):
+            item = _decode_list(item)
+        elif isinstance(item, dict):
+            item = _decode_dict(item)
+        rv.append(item)
+    return rv
+
+def _decode_dict(data):
+    rv = {}
+    for key, value in data.iteritems():
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        elif isinstance(value, list):
+            value = _decode_list(value)
+        elif isinstance(value, dict):
+            value = _decode_dict(value)
+        rv[key] = value
+    return rv
